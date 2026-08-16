@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Meet Me? 💗</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+
+    background:
+        radial-gradient(circle at 20% 20%, #542047, transparent 35%),
+        radial-gradient(circle at 80% 80%, #35203f, transparent 40%),
+        #100914;
+
+    color: white;
+
+    overflow: hidden;
+}
+
+.page {
+    display: none;
+    width: 100%;
+    height: 100dvh;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 12px;
+}
+
+.page.active {
+    display: flex;
+    animation: pageIn .35s ease;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card {
+    width: min(90vw, 430px);
+
+    max-height: 92dvh;
+    height: auto;
+
+    padding: 22px 20px 26px;
+
+    border-radius: 28px;
+    text-align: center;
+
+    background: rgba(25, 12, 31, 0.95);
+
+    border: 1px solid rgba(255, 120, 180, .15);
+
+    box-shadow:
+        0 0 50px rgba(255, 70, 160, .15);
+
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+
+    display: flex;
+    flex-direction: column;
+
+    scrollbar-width: thin;
+    scrollbar-color: #ff7aa8 #251a29;
+}
+
+.card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card::-webkit-scrollbar-track {
+    background: #251a29;
+    border-radius: 10px;
+}
+
+.card::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff729f, #ffb36b);
+    border-radius: 10px;
+}
+
+.progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: rgba(25, 12, 31, 0.95);
+    padding-top: 2px;
+    z-index: 2;
+}
+
+.progress span {
+    height: 3px;
+    flex: 1;
+    border-radius: 10px;
+    background: #33253a;
+    transition: background .3s ease;
+}
+
+.progress span.active {
+    background: linear-gradient(90deg, #ff729f, #ffb36b);
+}
+
+.illustration {
+    width: 128px;
+    height: 128px;
+    margin: 4px auto 6px;
+    animation: float 2.6s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.illustration svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 22px;
+    margin: 4px auto 10px;
+    box-shadow: 0 14px 40px rgba(255, 70, 140, .3);
+    border: 1px solid rgba(255, 150, 190, .25);
+    animation: float 2.6s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes float {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+h1 {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: clamp(24px, 6vw, 34px);
+    line-height: 1.15;
+
+    color: #ffb4d1;
+
+    margin: 10px 0 8px;
+}
+
+.subtitle {
+    color: #a99baa;
+    font-size: 15px;
+    margin: 0;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 26px;
+    flex-shrink: 0;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .12s ease, background .2s ease;
+}
+
+button:active {
+    transform: scale(.94);
+}
+
+.yes {
+    border: none;
+    padding: 16px 44px;
+    border-radius: 40px;
+    background: linear-gradient(135deg, #ff5b99, #ff7aa8);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 10px 35px rgba(255, 70, 140, .3);
+}
+
+.yes:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 14px 40px rgba(255, 70, 140, .45);
+}
+
+.no {
+    padding: 15px 32px;
+    border-radius: 40px;
+    background: #29202f;
+    border: 1px solid #493b50;
+    color: #c9bacb;
+    font-size: 16px;
+    transition: all .18s ease;
+}
+
+.choice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 22px;
+    flex-shrink: 0;
+}
+
+.choice {
+    padding: 18px 8px;
+    border-radius: 20px;
+    border: 1px solid #403044;
+    background: #211425;
+    color: white;
+    transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.choice.wide {
+    grid-column: 1 / -1;
+}
+
+.choice:hover {
+    transform: translateY(-4px);
+    border-color: #ff8db7;
+}
+
+.choice.selected {
+    background: linear-gradient(135deg, #ff5f9e, #bd477e);
+    border-color: #ff78ae;
+    box-shadow: 0 10px 30px rgba(255, 80, 150, .25);
+    animation: pop .25s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+.icon {
+    font-size: 30px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.next {
+    margin-top: 22px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 30px;
+    background: #ff629e;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -6px 18px rgba(16, 9, 20, 0.9);
+}
+
+.next:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.next:not(:disabled):hover {
+    background: #ff7aad;
+}
+
+.date-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 22px;
+    flex-shrink: 0;
+}
+
+.date {
+    padding: 15px 8px;
+    border-radius: 18px;
+    background: #211425;
+    border: 1px solid #403044;
+    color: white;
+    transition: transform .15s ease, background .2s ease;
+}
+
+.date:hover {
+    transform: translateY(-3px);
+}
+
+.date small {
+    display: block;
+    color: #aa9eae;
+    margin-bottom: 4px;
+}
+
+.date.selected {
+    background: #ff609b;
+    border-color: #ff8db7;
+    animation: pop .25s ease;
+}
+
+.final-heart {
+    animation: heartbeat 1.2s infinite;
+}
+
+@keyframes heartbeat {
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.summary {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 22px;
+    background: #211425;
+    text-align: left;
+    line-height: 1.8;
+    flex-shrink: 0;
+}
+
+.summary strong {
+    color: #ff91b8;
+}
+
+.error {
+    color: #ff829f;
+    margin-top: 12px;
+}
+
+.hearts {
+    position: fixed;
+    pointer-events: none;
+    font-size: 20px;
+    animation: rise 5s linear forwards;
+    z-index: 999;
+}
+
+@keyframes rise {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+}
+
+@media (max-height: 700px) {
+    .illustration { width: 92px; height: 92px; margin: 2px auto 4px; }
+    .hero-image { max-width: 240px; margin: 2px auto 6px; }
+    h1 { font-size: clamp(20px, 5.5vw, 28px); margin: 6px 0; }
+    .buttons, .choice-grid, .date-grid { margin-top: 14px; }
+    .choice { padding: 14px 8px; }
+    .icon { font-size: 24px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- PAGE 1 : ASK -->
+
+<section class="page active" id="page1">
+
+<div class="card">
+
+    <div class="progress">
+        <span class="active"></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <img class="hero-image" alt="Two friends meeting again" src="image.png">
+
+    <h1>
+        Will you come<br>
+        to meet me?
+    </h1>
+
+    <p class="subtitle">
+        Pathu romba naal aachu... vaanga sandhipom! 👀
+    </p>
+
+    <div class="buttons">
+
+        <button class="yes" onclick="goTo(2)">
+            Yes! 🥳
+        </button>
+
+        <button class="no" id="noBtn">
+            No
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- PAGE 2 : DATE -->
+
+<section class="page" id="page2">
+
+<div class="card">
+
+    <div class="progress">
+        <span class="active"></span>
+        <span class="active"></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="illustration">
+        <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="g2a" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#ff8fb3"/>
+                    <stop offset="1" stop-color="#ff5b99"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="64" cy="112" rx="42" ry="6" fill="#000" opacity=".18"/>
+            <rect x="22" y="30" width="84" height="72" rx="14" fill="#2c1c30" stroke="#4a3550" stroke-width="2"/>
+            <rect x="22" y="30" width="84" height="24" rx="14" fill="url(#g2a)"/>
+            <rect x="22" y="42" width="84" height="12" fill="url(#g2a)"/>
+            <rect x="38" y="20" width="8" height="20" rx="4" fill="#ffcf9e"/>
+            <rect x="82" y="20" width="8" height="20" rx="4" fill="#ffcf9e"/>
+            <g fill="#4a3550">
+                <circle cx="38" cy="66" r="4"/>
+                <circle cx="52" cy="66" r="4"/>
+                <circle cx="66" cy="66" r="4"/>
+                <circle cx="80" cy="66" r="4"/>
+                <circle cx="94" cy="66" r="4"/>
+                <circle cx="38" cy="80" r="4"/>
+                <circle cx="52" cy="80" r="4"/>
+                <circle cx="80" cy="80" r="4"/>
+                <circle cx="94" cy="80" r="4"/>
+            </g>
+            <circle cx="66" cy="80" r="9" fill="#ff5b99"/>
+            <path d="M66 76 C64 73 59 74 59 78 C59 81 66 86 66 86 C66 86 73 81 73 78 C73 74 68 73 66 76 Z" fill="#fff"/>
+        </svg>
+    </div>
+
+    <h1>
+        When are you free?
+    </h1>
+
+    <p class="subtitle">
+        Pick a day that works for you 💕
+    </p>
+
+    <div class="date-grid" id="dateGrid"></div>
+
+    <button class="next" id="dateNext" disabled onclick="goTo(3)">
+        Next → Place 📍
+    </button>
+
+</div>
+
+</section>
+
+
+<!-- PAGE 3 : PLACE -->
+
+<section class="page" id="page3">
+
+<div class="card">
+
+    <div class="progress">
+        <span class="active"></span>
+        <span class="active"></span>
+        <span class="active"></span>
+        <span></span>
+    </div>
+
+    <div class="illustration">
+        <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="g4a" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ff8fb3"/>
+                    <stop offset="1" stop-color="#ff5b99"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="64" cy="112" rx="30" ry="6" fill="#000" opacity=".18"/>
+            <path d="M64 16 C40 16 24 34 24 56 C24 86 64 108 64 108 C64 108 104 86 104 56 C104 34 88 16 64 16 Z" fill="url(#g4a)"/>
+            <circle cx="64" cy="56" r="20" fill="#2c1c30"/>
+            <path d="M64 47 C61 42 53 44 53 50 C53 55 64 63 64 63 C64 63 75 55 75 50 C75 44 67 42 64 47 Z" fill="#ffcf9e"/>
+        </svg>
+    </div>
+
+    <h1>
+        Where shall we go?
+    </h1>
+
+    <p class="subtitle">
+        You pick the spot 😌
+    </p>
+
+    <div class="choice-grid">
+
+        <button class="choice" onclick="selectPlace(this,'Coffee Shop ☕')">
+            <span class="icon"></span>
+            food spot
+        </button>
+
+        <button class="choice" onclick="selectPlace(this,'Mall 🛍️')">
+            <span class="icon">🛍️</span>
+            Mall
+        </button>
+
+        <button class="choice" onclick="selectPlace(this,'Beach 🏖️')">
+            <span class="icon">🏖️</span>
+            Beach
+        </button>
+
+        <button class="choice" onclick="selectPlace(this,'Park 🌳')">
+            <span class="icon">🌳</span>
+            Park
+        </button>
+
+        <button class="choice wide" onclick="selectPlace(this,'Your Choice 🎁')">
+            <span class="icon">🎁</span>
+            Your Choice
+        </button>
+
+    </div>
+
+    <button class="next" id="placeNext" disabled onclick="goTo(4)">
+        Next → Time ⏰
+    </button>
+
+</div>
+
+</section>
+
+
+<!-- PAGE 4 : TIME (auto-advances on select) -->
+
+<section class="page" id="page4">
+
+<div class="card">
+
+    <div class="progress">
+        <span class="active"></span>
+        <span class="active"></span>
+        <span class="active"></span>
+        <span class="active"></span>
+    </div>
+
+    <div class="illustration">
+        <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="g3a" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ffcf9e"/>
+                    <stop offset="1" stop-color="#ff9f6b"/>
+                </linearGradient>
+            </defs>
+            <ellipse cx="64" cy="112" rx="40" ry="6" fill="#000" opacity=".18"/>
+            <rect x="44" y="14" width="10" height="10" rx="3" fill="#ff9f6b" transform="rotate(-25 49 19)"/>
+            <rect x="74" y="14" width="10" height="10" rx="3" fill="#ff9f6b" transform="rotate(25 79 19)"/>
+            <circle cx="64" cy="66" r="42" fill="#2c1c30" stroke="#4a3550" stroke-width="2"/>
+            <circle cx="64" cy="66" r="34" fill="url(#g3a)"/>
+            <g stroke="#a5426b" stroke-width="2" stroke-linecap="round">
+                <line x1="64" y1="66" x2="64" y2="46"/>
+                <line x1="64" y1="66" x2="80" y2="66"/>
+            </g>
+            <circle cx="64" cy="66" r="4" fill="#a5426b"/>
+        </svg>
+    </div>
+
+    <h1>
+        What time works?
+    </h1>
+
+    <p class="subtitle">
+        Pick one — we'll lock it in right away 🌸
+    </p>
+
+    <div class="choice-grid">
+
+        <button class="choice wide" onclick="selectTime(this,'Morning 🌅')">
+            <span class="icon">🌅</span>
+            Morning
+        </button>
+
+        <button class="choice wide" onclick="selectTime(this,'Afternoon ☀️')">
+            <span class="icon">☀️</span>
+            Afternoon
+        </button>
+
+        <button class="choice wide" onclick="selectTime(this,'Evening 🌆')">
+            <span class="icon">🌆</span>
+            Evening
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<!-- PAGE 5 : FINAL -->
+
+<section class="page" id="page5">
+
+<div class="card">
+
+    <img class="hero-image" alt="Waiting to meet you" style="max-width:260px;" src="image.png">
+
+    <h1>
+        It's confirmed!🥳 
+    </h1>
+
+    <p class="subtitle">
+        Okay then... it's officially a plan.
+    </p>
+
+    <div class="summary">
+
+        📅 <strong>Date:</strong>
+        <span id="finalDate"></span>
+        <br>
+
+        📍 <strong>Place:</strong>
+        <span id="finalPlace"></span>
+        <br>
+
+        ⏰ <strong>Time:</strong>
+        <span id="finalTime"></span>
+
+    </div>
+
+    <p style="margin-top:20px;line-height:1.7;color:#d8cbd8;">
+        I'll see you there! 👋🏻<br>
+        Don't be late... I'll be waiting. 🥰<br>
+        Marakama vanthurunga!!!😁
+    </p>
+
+    <p id="emailStatus" class="subtitle">
+        Sending our little plan... 💌
+    </p>
+
+</div>
+
+</section>
+
+
+<script>
+
+
+const EMAILJS_PUBLIC_KEY = "8me1mFxLKW9A1RimR";
+const EMAILJS_SERVICE_ID = "service_1lksf6v";
+const EMAILJS_TEMPLATE_ID = "template_qgmen6y";
+emailjs.init({
+    publicKey: EMAILJS_PUBLIC_KEY
+});
+
+
+/* =========================================
+   VARIABLES
+   ========================================= */
+
+let selectedDate = "";
+let selectedTime = "";
+let selectedPlace = "";
+
+
+/* =========================================
+   NO BUTTON ESCAPE
+   ========================================= */
+
+const noBtn = document.getElementById("noBtn");
+
+function moveNoButton() {
+
+    const maxX = window.innerWidth - 130;
+    const maxY = window.innerHeight - 80;
+
+    const x = Math.max(10, Math.random() * maxX);
+    const y = Math.max(10, Math.random() * maxY);
+
+    noBtn.style.position = "fixed";
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+
+    noBtn.innerText =
+        ["Meet pannalam vanga 🥺",
+         "Yes kudunga, pathu rombanaal aachu 🥹",
+         "No lam yaen thodapakuringa 😌",
+         "Vaangalen sandhipom  🫶",
+         "Yes kudutha ennavam ippa? 👀"][Math.floor(Math.random() * 5)];
+}
+
+noBtn.addEventListener("mouseenter", moveNoButton);
+noBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    moveNoButton();
+});
+
+
+/* =========================================
+   PAGE NAVIGATION
+   ========================================= */
+
+function goTo(number) {
+
+    document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+    });
+
+    document.getElementById("page" + number)
+        .classList.add("active");
+
+    createHearts();
+}
+
+
+/* =========================================
+   CREATE DATES
+   ========================================= */
+
+const dateGrid = document.getElementById("dateGrid");
+
+const today = new Date();
+
+for(let i = 1; i <= 13; i++) {
+
+    const date = new Date(today);
+
+    date.setDate(today.getDate() + i);
+
+    const dayName = date.toLocaleDateString(
+        "en-US",
+        { weekday: "short" }
+    );
+
+    const monthName = date.toLocaleDateString(
+        "en-US",
+        { month: "short" }
+    );
+
+    const dayNumber = date.getDate();
+
+    const button = document.createElement("button");
+
+    button.className = "date";
+
+    button.innerHTML = `
+        <small>${dayName}</small>
+        ${dayNumber} ${monthName}
+    `;
+
+    button.onclick = function() {
+
+        document.querySelectorAll(".date")
+            .forEach(x => x.classList.remove("selected"));
+
+        this.classList.add("selected");
+
+        selectedDate =
+            `${dayName}, ${dayNumber} ${monthName}`;
+
+        document.getElementById("dateNext")
+            .disabled = false;
+    };
+
+    dateGrid.appendChild(button);
+}
+
+
+/* =========================================
+   PLACE
+   ========================================= */
+
+function selectPlace(button, value) {
+
+    document.querySelectorAll("#page3 .choice")
+        .forEach(x => x.classList.remove("selected"));
+
+    button.classList.add("selected");
+
+    selectedPlace = value;
+
+    document.getElementById("placeNext")
+        .disabled = false;
+}
+
+
+/* =========================================
+   TIME — selecting auto-advances to final page
+   ========================================= */
+
+function selectTime(button, value) {
+
+    document.querySelectorAll("#page4 .choice")
+        .forEach(x => x.classList.remove("selected"));
+
+    button.classList.add("selected");
+
+    selectedTime = value;
+
+    setTimeout(finish, 350);
+}
+
+
+/* =========================================
+   FINAL PAGE + EMAIL
+   ========================================= */
+
+function finish() {
+
+    document.getElementById("finalDate").innerText =
+        selectedDate;
+
+    document.getElementById("finalPlace").innerText =
+        selectedPlace;
+
+    document.getElementById("finalTime").innerText =
+        selectedTime;
+
+    goTo(5);
+
+    sendEmail();
+}
+
+
+/* =========================================
+   EMAILJS
+   ========================================= */
+
+function sendEmail() {
+
+    const templateParams = {
+
+        date: selectedDate,
+
+        place: selectedPlace,
+
+        time: selectedTime,
+
+        message:
+        "Someone said YES! 💕 The meet-up is confirmed."
+
+    };
+
+    emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+    )
+    .then(function() {
+
+        document.getElementById("emailStatus")
+            .innerText =
+            "Plan confirmed! 💌 See you soon!";
+
+    })
+    .catch(function(error) {
+
+        console.log(error);
+
+        document.getElementById("emailStatus")
+            .innerText =
+            "It's confirmed! 😎";
+    });
+}
+
+
+/* =========================================
+   FLOATING HEARTS
+   ========================================= */
+
+function createHearts() {
+
+    for(let i = 0; i < 8; i++) {
+
+        const heart = document.createElement("div");
+
+        heart.className = "hearts";
+
+        heart.innerText =
+            ["💕","💗","💖","🥳","🥰"]
+            [Math.floor(Math.random()*5)];
+
+        heart.style.left =
+            Math.random() * 100 + "vw";
+
+        heart.style.bottom = "-30px";
+
+        heart.style.animationDuration =
+            (3 + Math.random()*3) + "s";
+
+        document.body.appendChild(heart);
+
+        setTimeout(() => {
+            heart.remove();
+        }, 6000);
+    }
+}
+
+</script>
+
+</body>
+</html>
